@@ -3,10 +3,6 @@ import json
 import logging
 import itertools
 import requests
-from bs4 import BeautifulSoup
-from operator import itemgetter
-import queue
-from threading import Thread
 import time
 
 logger = logging.getLogger(__name__)
