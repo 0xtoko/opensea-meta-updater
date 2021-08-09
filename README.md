@@ -12,6 +12,7 @@ It can query all items and queue metadata update on 10,000 items in around 250 s
 ## Functionality
 - Query all items in a collection.
 - Queue metadata update on all items in a collection.
+> Reminder: It will take some time for the metadata to get updated on Opensea client since this process is for requesting (queuing) metadata update. 
 
 ## Installation
 
