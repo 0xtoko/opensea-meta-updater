@@ -48,12 +48,10 @@ Update metadata of RUG.WTF's collection.
 python update.py --create-list -c "0x6c94954d0b265f657a4a1b35dfaa8b73d1a3f199"
 ```
 #### 2. Queue Metadata Update
-Queue metadata update on all items in collection.
 ```bash
 python update.py --update_metadata -c "0x6c94954d0b265f657a4a1b35dfaa8b73d1a3f199"
 ```
 #### 3. Query Items and Queue Metadata Update
-You can do both in one command.
 ```bash
 python update.py --create-list --update_metadata -c "0x6c94954d0b265f657a4a1b35dfaa8b73d1a3f199"
 ```
