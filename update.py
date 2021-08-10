@@ -284,7 +284,8 @@ def queue_metadata_update(items, batch_size, cool_down, delay):
             response = requests.post(url, json=param, headers=header)
             # Check for HTTP error
             if response.status_code != 200:
-                logger.warning(response.text)
+                logger.warning(f"Response HTML:\n{response.text}")
+                logger.info(f"Retrying request in {cool_down} second(s).")
 
                 # Rate Limit Cooldown Counter
                 for _ in range(cool_down, 0, -1):
