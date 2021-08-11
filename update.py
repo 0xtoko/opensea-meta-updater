@@ -29,6 +29,12 @@ def load_update_items(contract_address):
         items = json.load(file)
     return sorted(items,key=lambda x: x["node"]["asset"]["tokenId"])
 
+# load query from file
+def load_gql_query(file_name):
+    with open(f'query/{file_name}', 'r') as file:
+        query = file.read()
+    return query
+
 
 # Parse args
 def get_script_arguments():
@@ -37,14 +43,14 @@ def get_script_arguments():
     parser.add_argument('--update_metadata',action='store_true',help='POST metadata update queue to Opensea. Requires: "--contract_address".')
     parser.add_argument('-c','--contract-address',required=True,type=str,help='Contract address of NFT collection.')
     parser.add_argument('-b','--batch_size',type=int,default=1000,help="(optional) Number of Queues to batch in one request on '--update_metadata'. Default is 1000.")
-    parser.add_argument('--cool-down',type=int,default=1,help='(optional) Seconds to wait when API rate limit is reached. Default is 1.')
-    parser.add_argument('--delay',type=int,default=0.2,help='(optional) Interval of each API call. Default is 0.2.')
+    # parser.add_argument('--cool-down',type=int,help='(optional) Seconds to wait when API rate limit is reached.')
+    # parser.add_argument('--delay',type=int,help='(optional) Interval of each API call.')
     args = parser.parse_args()
     logger.info(args)
     return args
 
 # Query collectionSlug and total number of items from Contract address
-def get_collection_detail(contract_address, cool_down):
+def get_collection_detail(contract_address, cool_down=0.2):
     url = "https://api.opensea.io/graphql/"
     # bypass cloudflare
     header={
@@ -52,17 +58,7 @@ def get_collection_detail(contract_address, cool_down):
         "User-Agent": "PostmanRuntime/7.26.8"
     }
     # Graphql Query: Get collectionSlug
-    slug_query = """
-    query NavSearchQuery($query: String!) {
-        collections(first: 1, query: $query, sortBy: SEVEN_DAY_VOLUME, includeHidden: true) {
-            edges {
-                node {
-                    slug
-                }
-            }
-        }
-    }
-    """
+    slug_query = load_gql_query("slug_query.graphql")
     slug_variables = {
         "query": f"{contract_address}"
     }
@@ -88,13 +84,7 @@ def get_collection_detail(contract_address, cool_down):
     time.sleep(cool_down)
 
     # Graphql Query: Get number of items in collection
-    count_query = """
-    query ($collections: [CollectionSlug!]) {
-        search(collections: $collections, first: 1) {
-            totalCount
-        }
-    }
-    """
+    count_query = load_gql_query("collection_item_count_query.graphql")
     count_variables = {
         "collections": [f"{collection_slug}"]
     }
@@ -118,7 +108,7 @@ def get_collection_detail(contract_address, cool_down):
     return (collection_slug, count_result)
     
 # This will create update list of collection which includes data needed to queue metadata update
-def create_items_list(collection_slug, total_count, limit, cool_down, delay):
+def create_items_list(collection_slug, total_count, limit, cool_down=0.2, delay=1):
     complete_items = []
     total_null_count = 0
     url = "https://api.opensea.io/graphql/"
@@ -134,63 +124,7 @@ def create_items_list(collection_slug, total_count, limit, cool_down, delay):
     while has_next_page:
         time.sleep(delay)
 
-        query = """
-        query AssetSearchListPaginationQuery(
-        $collections: [CollectionSlug!]
-        $count: Int
-        $cursor: String
-        ) {
-            ...AssetSearchListPagination_data
-        }
-
-        fragment AssetSearchListPagination_data on Query {
-        search(after: $cursor,collections: $collections, first: $count) {
-            edges {
-                node {
-                    ...AssetSearchList_data
-                }
-            }
-            totalCount
-                pageInfo {
-                    endCursor
-                    hasNextPage
-                }
-            }
-        }
-
-        fragment AssetSearchList_data on SearchResultType {
-            asset {
-                assetContract {
-                    address
-                    chain
-                    id
-                }
-                collection {
-                    id
-                }
-                relayId
-                tokenId
-                ...AssetSelectionItem_data
-                ...asset_url
-                id
-            }
-        }
-
-        fragment AssetSelectionItem_data on AssetType {
-            imageUrl
-            name
-            relayId
-        }
-
-        fragment asset_url on AssetType {
-            assetContract {
-                address
-                chain
-                id
-            }
-            tokenId
-        }
-        """
+        query = load_gql_query("asset_search_list_pagination_query.graphql")
 
         variables = {
         "collections": [
@@ -249,7 +183,7 @@ def create_items_list(collection_slug, total_count, limit, cool_down, delay):
     return complete_items
 
 # This will queue metadata update to Opensea
-def queue_metadata_update(items, batch_size, cool_down, delay):
+def queue_metadata_update(items, batch_size, cool_down=3, delay=3):
     url = "https://api.opensea.io/graphql/"
     # bypass cloudflare
     header={
@@ -324,15 +258,15 @@ def main():
 
     if args.create_list:
         logging.basicConfig(format='%(asctime)s - Opensea Meta Updater - [Create List] - %(levelname)s - %(message)s', level=logging.INFO,force=True)
-        (collection_slug, total_count) = get_collection_detail(args.contract_address, args.cool_down)
-        items = create_items_list(collection_slug, total_count, 100, args.cool_down, args.delay) #limit locked to 100. 100 max.
+        (collection_slug, total_count) = get_collection_detail(args.contract_address)
+        items = create_items_list(collection_slug, total_count, 100) #limit locked to 100. 100 max.
         save_update_items(args.contract_address,items)
         logger.info(f"Successfully Created and Saved {collection_slug}'s Items List")
     
     if args.update_metadata:
         logging.basicConfig(format='%(asctime)s - Opensea Meta Updater - [Post Update] - %(levelname)s - %(message)s', level=logging.INFO,force=True)
         items = load_update_items(args.contract_address)
-        queue_metadata_update(items, args.batch_size, args.cool_down, args.delay)
+        queue_metadata_update(items, args.batch_size)
 
 
 if __name__ == '__main__':
