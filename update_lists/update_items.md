@@ -1,1 +1,1 @@
-Queried Items will be saved here.
+Queried Items json will be saved here.
