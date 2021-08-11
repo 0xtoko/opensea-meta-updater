@@ -1,0 +1,42 @@
+query AssetSearchListPaginationQuery(
+  $collections: [CollectionSlug!]
+  $count: Int
+  $cursor: String
+) {
+  ...AssetSearchListPagination_data_31q0et
+}
+
+fragment AssetSearchListPagination_data_31q0et on Query {
+  search(after: $cursor,collections: $collections,sortBy: CREATED_DATE,sortAscending: true, first: $count) {
+    edges {
+      node {
+        ...AssetSearchList_data
+      }
+    }
+    totalCount
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+fragment AssetSearchList_data on SearchResultType {
+  asset {
+    assetContract {
+      address
+      chain
+      id
+    }
+    collection {
+      id
+    }
+    tokenMetadata
+    relayId
+    tokenId
+    imageUrl
+  	name
+  	externalLink
+    id
+  }
+}

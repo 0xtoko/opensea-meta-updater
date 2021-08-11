@@ -1,0 +1,14 @@
+query NavSearchQuery($query: String!) {
+  collections(
+    first: 1
+    query: $query
+    sortBy: SEVEN_DAY_VOLUME
+    includeHidden: true
+  ) {
+    edges {
+      node {
+        slug
+      }
+    }
+  }
+}

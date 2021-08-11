@@ -1,0 +1,5 @@
+query ($collections: [CollectionSlug!]) {
+  search(collections: $collections, first: 1) {
+    totalCount
+  }
+}
