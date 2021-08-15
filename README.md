@@ -5,6 +5,9 @@ Inspired by [RUG.WTF](https://rug.wtf/)'s dynamic NFT art.
 
 It can query all items and queue metadata update on 10,000 items in around 250 seconds!
 
+> Recently, Opensea has tightened the security around their GraphQL API. Therefore update.py script might be blocked by the cloudflare. In this only way to push the updates is to use the manual_mutation.py and copy paste the generated mutations to the browser console and run them. (This will only work if you already have generated the items list.)  
+> Fix for this change are in progress.
+
 <p align="center">
   <img src="https://storage.googleapis.com/opensea-static/Logomark/OpenSea-Full-Logo%20(dark)%20-%20thumb.png" width="500">
 </p>
