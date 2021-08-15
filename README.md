@@ -84,6 +84,16 @@ python check.py -c "{contract_address}" -s "{new_IPFS_hash}" -n --uri-check-only
 | --cool-down            | (optional) Seconds to wait when API rate limit is reached. Default is 1.   |
 | --delay                | (optional) Interval of each API call. Default is 0.2.                      |
 
+---
+
+
+### manual_mutation.py
+
+#### Generate manual mutation files
+```bash
+python manual_mutation.py -c "{contract_address}"
+```
+
 ## Examples
 
 ### update.py
@@ -112,6 +122,15 @@ python check.py -c "0x6c94954d0b265f657a4a1b35dfaa8b73d1a3f199" -s "QmT5uADipP1x
 #### Get stats on items stored locally
 ```bash
 python check.py -c "0x6c94954d0b265f657a4a1b35dfaa8b73d1a3f199" -s "QmT5uADipP1xmWSXXx9r7Bnzrb5gwNnuLdH8ohP3ue3qw9" -n --uri-check-only
+```
+
+
+---
+### manual_mutation.py
+
+#### Generate manual mutation files
+```bash
+python manual_mutation.py -c "0x6c94954d0b265f657a4a1b35dfaa8b73d1a3f199"
 ```
 
 ## Changelog
