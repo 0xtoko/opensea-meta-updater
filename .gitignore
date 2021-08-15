@@ -1,5 +1,11 @@
 .DS_Store
 
-update_lists/*.json
+.vscode
+
+update_lists/
 
 memo/
+
+manual_push_mutation/
+
+development/
